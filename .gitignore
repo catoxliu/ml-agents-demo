@@ -3,7 +3,18 @@
 [Oo]bj/
 [Bb]uild/
 [Bb]uilds/
+[Pp]ackages/
+[Uu]nity[Pp]ackage[Mm]anager/
 Assets/AssetStoreTools*
+
+# Tensorflow Model Info
+/models
+/summaries
+mlagent_python/models
+mlagent_python/summaries
+
+# Environemnt logfile
+*unity-environment.log
 
 # Visual Studio cache directory
 .vs/
@@ -34,3 +45,35 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+*.app
+*.exe
+*.x86_64
+*.x86
+
+# Tensorflow Sharp Files
+Assets/ML-Agents/Plugins/Android*
+Assets/ML-Agents/Plugins/iOS*
+Assets/ML-Agents/Plugins/Computer*
+Assets/ML-Agents/Plugins/System*
+
+# Generated doc folders
+/docs/html
+
+# Mac hidden files
+*.DS_Store
+*/.ipynb_checkpoints
+*/.idea
+*.pyc
+*.idea/misc.xml
+*.idea/modules.xml
+*.iml
+*.xml
+*.cache
+*/build/
+*/dist/
+*.egg-info*
+*.eggs*
+*.gitignore.swp
+
+
+.DS_Store
