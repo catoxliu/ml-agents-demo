@@ -166,6 +166,7 @@ StudentBrain:
     buffer_size: 128
 
 CarRaceBrain:
+    trainer: custom_ppo
     batch_size: 32
     normalize: false
     num_layers: 2
