@@ -43,6 +43,7 @@ public class PlayerCar : BaseCar {
         {
             m_CarHitAction();
         }
+        Reset();
     }
 
 }

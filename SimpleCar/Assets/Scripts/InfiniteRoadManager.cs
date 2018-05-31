@@ -28,21 +28,40 @@ public class InfiniteRoadManager : MonoBehaviour {
             m_RoadPool[i].position = new Vector3(m_fRoadLength * i, -0.5f, 0);
         }
         InitCars();
-        CreatePlayerCar();
+        //In ML-Agent, create player car should be somewhere else
+        //CreatePlayerCar();
     }
 
-    void ResetGame()
+    public void ResetGame()
     {
         ClearNearCars();
-        m_Player.Reset();
         m_iScore = 0;
     }
-	
-	void Update () {
+
+    //Use Angent To update road manager.
+    public void NextStep() {
         //For just a same look-like straight road, no need to move the road.
         //MoveRoad();
         MoveCars();
         m_iScore++;
+    }
+
+    //To use the simplest way to detect whether player is facing a car in front
+    public bool IsDanger(Vector3 pos)
+    {
+        foreach (var car in m_CarsOnRoad)
+        {
+            //if the car is to near or in diffrent track, continue
+            if (car.transform.position.x < 8 || car.transform.position.z != pos.z)
+                continue;
+            //if it is still far away, break;
+            if (car.transform.position.x - pos.x > 30)
+                break;
+            //if the car in front of player and less than 15, return true.
+            if (car.transform.position.x - pos.x < 15.0f)
+                return true;
+        }
+        return false;
     }
 
     void MoveRoad()
