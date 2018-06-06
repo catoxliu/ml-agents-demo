@@ -114,7 +114,7 @@ public class AgentCamera1 : MonoBehaviour
                 var i = 0;
                 foreach (var bit in m_bSingleChannelRawData)
                 {
-                    observationVector[i] = bit; //or bit/255.0f;
+                    observationVector[i] = bit / 255.0f; //or bit/255.0f;
                     i++;
                 }
                 break;
@@ -135,7 +135,7 @@ public class AgentCamera1 : MonoBehaviour
     private void OnGUI()
     {
         //Draw the RenderTexture for debug use
-        Graphics.DrawTexture(new Rect(100, 0, 40, 16), m_AgentRT);
+        Graphics.DrawTexture(new Rect(0, 30, 40, 16), m_AgentRT);
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
