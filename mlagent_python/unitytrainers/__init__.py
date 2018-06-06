@@ -5,5 +5,5 @@ from .bc.models import *
 from .bc.trainer import *
 from .ppo.models import *
 from .ppo.trainer import *
-from .ppo_custom.custom_ppo_models import *
-from .ppo_custom.custom_ppo_trainer import *
+from .custom.custom_models import *
+from .custom.custom_trainer import *
