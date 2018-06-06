@@ -15,9 +15,11 @@ public class InfiniteRoadManager : MonoBehaviour {
     //m_fSpeed: the speed of player car, which is used to move the road in face
     //m_fGenerateRate: this factor could define the new car generate rate. the smaller, the more.
     //it can not be set to less than 1;
-    //m_iScore: increment every frame until player hit something.
+    //m_iDriveLength: increment every frame until player hit something.
+    //m_iPassCarCount: how many car player passed until player hit something.
+    //m_iScoreRecord: the highest score player has achieved, score = m_iDriveLength * m_iPassCarCount
     private float m_fSpeed = 1.0f, m_fGenerateRate = 3.0f;
-    private int m_iCursor = 0, m_iScore = 0;
+    private int m_iCursor = 0, m_iDriveLength = 0, m_iPassCarCount = 0, m_iScoreRecord = 0;
     private PlayerCar m_Player;
 
 	// Use this for initialization
@@ -35,7 +37,11 @@ public class InfiniteRoadManager : MonoBehaviour {
     public void ResetGame()
     {
         ClearNearCars();
-        m_iScore = 0;
+        Vector3 carPos = m_CarsOnRoad[0].transform.position;
+        carPos.z = 0;
+        m_CarsOnRoad[0].Reset(carPos);
+        m_iDriveLength = 0;
+        m_iPassCarCount = 0;
     }
 
     //Use Angent To update road manager.
@@ -43,7 +49,17 @@ public class InfiniteRoadManager : MonoBehaviour {
         //For just a same look-like straight road, no need to move the road.
         //MoveRoad();
         MoveCars();
-        m_iScore++;
+        m_iDriveLength++;
+        if (m_iDriveLength * m_iPassCarCount > m_iScoreRecord)
+            m_iScoreRecord = m_iDriveLength * m_iPassCarCount;
+    }
+
+    public Vector3 GetNextCarPos(int startIdx = 0)
+    {
+        if (startIdx < m_CarsOnRoad.Count - 1)
+            return m_CarsOnRoad[startIdx + 1].transform.position;
+        else
+            return Vector3.zero;
     }
 
     //To use the simplest way to detect whether player is facing a car in front
@@ -57,8 +73,8 @@ public class InfiniteRoadManager : MonoBehaviour {
             //if it is still far away, break;
             if (car.transform.position.x - pos.x > 30)
                 break;
-            //if the car in front of player and less than 15, return true.
-            if (car.transform.position.x - pos.x < 15.0f)
+            //if the car in front of player and less than X, return true.
+            if (car.transform.position.x - pos.x < 15)
                 return true;
         }
         return false;
@@ -84,10 +100,11 @@ public class InfiniteRoadManager : MonoBehaviour {
         for(m_iCursor = m_CarsOnRoad.Count - 1; m_iCursor >= 0; m_iCursor--)
         {
             m_CarsOnRoad[m_iCursor].Move();
-            if (m_CarsOnRoad[m_iCursor].transform.position.x < -m_fCarLength)
+            if (m_CarsOnRoad[m_iCursor].transform.position.x < 0)
             {
                 CarFactory.Instance.RecycleCar(m_CarsOnRoad[m_iCursor]);
                 m_CarsOnRoad.RemoveAt(m_iCursor);
+                m_iPassCarCount++;
             }
         }
         //Here needs a algorithm to add new car on roads.
@@ -101,7 +118,7 @@ public class InfiniteRoadManager : MonoBehaviour {
     void InitCars()
     {
         ClearAllCars();
-        int iInitCarNum = Random.Range(10, 20);
+        int iInitCarNum = Random.Range(6, 12);
         GenerateNewCars(iInitCarNum, m_fRoadLengthTotal, m_fCarLength);
     }
 
@@ -136,7 +153,7 @@ public class InfiniteRoadManager : MonoBehaviour {
     {
         for (m_iCursor = m_CarsOnRoad.Count - 1; m_iCursor >= 0; m_iCursor--)
         {
-            if (m_CarsOnRoad[m_iCursor].transform.position.x < m_fCarLength*m_fGenerateRate)
+            if (m_CarsOnRoad[m_iCursor].transform.position.x < m_fCarLength+8)
             {
                 CarFactory.Instance.RecycleCar(m_CarsOnRoad[m_iCursor]);
                 m_CarsOnRoad.RemoveAt(m_iCursor);
@@ -158,10 +175,11 @@ public class InfiniteRoadManager : MonoBehaviour {
     }
 
     //Socre Board to show some info
-    Rect scoreBoardSize = new Rect(0, 0, 100, 30);
+    Rect scoreBoardSize = new Rect(0, 0, 300, 30);
 
     private void OnGUI()
     {
-        GUI.Label(scoreBoardSize, "Scores : " + m_iScore);
+        GUI.Label(scoreBoardSize, string.Format("Length:{0,5:00000} PassCar:{1,3:000} Score Record:{2} ", 
+            m_iDriveLength, m_iPassCarCount, m_iScoreRecord));
     }
 }
