@@ -263,7 +263,7 @@ class CustomTrainer(Trainer):
 
                 batch_actions = np.array(_buffer['actions'][start:end])
 
-                feed_dict = {self.model.dropout_rate: 0.4,
+                feed_dict = {self.model.dropout_rate: 0.5,
                              self.model.batch_size: n_sequences,
                              self.model.sequence_length: self.sequence_length}
 

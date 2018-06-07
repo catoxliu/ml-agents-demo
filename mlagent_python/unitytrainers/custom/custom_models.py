@@ -51,11 +51,13 @@ class CustomModel(LearningModel):
         :return: List of hidden layer tensors.
         """
         image_input = tf.reshape(vector_input, tf.stack([-1, 40, 16, 1]));
-        conv1 = tf.layers.conv2d(image_input, 16, kernel_size=7, strides=2,
+        conv1 = tf.layers.conv2d(image_input, 32, kernel_size=5, padding="same",
                                  activation=tf.nn.relu)
-        conv2 = tf.layers.conv2d(conv1, 32, kernel_size=3,
+        pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=2, strides=2)
+        conv2 = tf.layers.conv2d(pool1, 64, kernel_size=3, padding="same",
                                  activation=tf.nn.relu)
-        hidden = c_layers.flatten(conv2)
+        pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=2, strides=2)
+        hidden = c_layers.flatten(pool2)
 
         for j in range(num_layers):
             hidden = tf.layers.dense(hidden, h_size, use_bias=False, activation=activation)

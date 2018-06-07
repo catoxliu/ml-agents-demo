@@ -167,15 +167,15 @@ StudentBrain:
 
 CarRaceBrain:
     trainer: custom
-    batch_size: 1024
+    batch_size: 32
     normalize: false
-    num_layers: 2
+    num_layers: 1
     hidden_units: 128
     beta: 0.05
     gamma: 0.85
     lambd: 0.95
-    buffer_size: 10240
-    max_steps: 6.0e5
+    buffer_size: 6400
+    max_steps: 5.0e5
     summary_freq: 2000
     time_horizon: 1024
     num_epoch: 3
