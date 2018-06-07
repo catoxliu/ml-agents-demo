@@ -28,7 +28,7 @@ public class BaseCar : MonoBehaviour {
 
     public void SetSpeed(float roadSpeed, float carSpeed = 0)
     {
-        if (carSpeed != 0) m_CarSpeed = carSpeed;
+        if (carSpeed > 0) m_CarSpeed = carSpeed;
         m_MoveSpeed = m_CarSpeed - roadSpeed;
     }
 

@@ -19,6 +19,7 @@ public class CarRaceBaseAgent : Agent {
         {
             Debug.LogError("Can't find RoadManager");
         }
+        m_RoadManager.IsTrainMode = brain.brainType == BrainType.External;
         m_PlayerCar = GetComponentInChildren<PlayerCar>();
         if (m_PlayerCar == null)
         {
@@ -56,7 +57,7 @@ public class CarRaceBaseAgent : Agent {
     {
         Done();
         SetReward(-10.0f);
-        Debug.Log("Car Hit!");
+        Debug.Log("Car Hit at " + m_PlayerCar.transform.position);
     }
 
     protected void PlayerAction()

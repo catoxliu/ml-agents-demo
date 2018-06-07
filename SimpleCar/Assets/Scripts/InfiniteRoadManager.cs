@@ -18,9 +18,15 @@ public class InfiniteRoadManager : MonoBehaviour {
     //m_iDriveLength: increment every frame until player hit something.
     //m_iPassCarCount: how many car player passed until player hit something.
     //m_iScoreRecord: the highest score player has achieved, score = m_iDriveLength * m_iPassCarCount
+    //m_iBornCarPosZ: in train mode, born car in fixed parttern, because training data will be shuffle
+    //any way, in play mode, born car in random tracks.
     private float m_fSpeed = 1.0f, m_fGenerateRate = 3.0f;
-    private int m_iCursor = 0, m_iDriveLength = 0, m_iPassCarCount = 0, m_iScoreRecord = 0;
+    private int m_iCursor = 0, m_iDriveLength = 0, m_iPassCarCount = 0, 
+        m_iScoreRecord = 0, m_iBornCarPosZ = 0;
     private PlayerCar m_Player;
+    private bool m_bIsTrain = false;
+
+    public bool IsTrainMode { get { return m_bIsTrain; } set { m_bIsTrain = value; } }
 
 	// Use this for initialization
 	void Start () {
@@ -68,7 +74,7 @@ public class InfiniteRoadManager : MonoBehaviour {
         foreach (var car in m_CarsOnRoad)
         {
             //if the car is to near or in diffrent track, continue
-            if (car.transform.position.x < 8 || car.transform.position.z != pos.z)
+            if (car.transform.position.x < 8 || Mathf.Abs(car.transform.position.z - pos.z) > 4)
                 continue;
             //if it is still far away, break;
             if (car.transform.position.x - pos.x > 30)
@@ -100,7 +106,7 @@ public class InfiniteRoadManager : MonoBehaviour {
         for(m_iCursor = m_CarsOnRoad.Count - 1; m_iCursor >= 0; m_iCursor--)
         {
             m_CarsOnRoad[m_iCursor].Move();
-            if (m_CarsOnRoad[m_iCursor].transform.position.x < 0)
+            if (m_CarsOnRoad[m_iCursor].transform.position.x < 5)
             {
                 CarFactory.Instance.RecycleCar(m_CarsOnRoad[m_iCursor]);
                 m_CarsOnRoad.RemoveAt(m_iCursor);
@@ -124,16 +130,22 @@ public class InfiniteRoadManager : MonoBehaviour {
 
     void GenerateNewCars(int car_count, float born_road_length, float born_start_pos_x = 0)
     {
-        int carPosZ;
         float carSpeed, carPosX;
         for (m_iCursor = 0; m_iCursor < car_count; m_iCursor++)
         {
+            if (m_bIsTrain)
+            {
+                m_iBornCarPosZ = ++m_iBornCarPosZ > 1 ? m_iBornCarPosZ - 3 : m_iBornCarPosZ;
+            }
+            else
+            {
+                m_iBornCarPosZ = Random.Range(-1, 2);
+            }
             var car = CarFactory.Instance.GetARandomCar();
-            carPosZ = Random.Range(-1, 2);
             carPosX = Random.Range(0.1f, 1.0f);
             carPosX = born_start_pos_x + (born_road_length / car_count) * (m_iCursor + carPosX);
             carSpeed = m_fSpeed - 0.8f;//Random.Range(0.1f, m_fSpeed);
-            car.Reset(new Vector3(carPosX, 0, carPosZ * 5.0f));
+            car.Reset(new Vector3(carPosX, 0, m_iBornCarPosZ * 5.0f));
             car.SetSpeed(m_fSpeed, carSpeed);
             car.Show();
             m_CarsOnRoad.Add(car);
