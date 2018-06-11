@@ -25,7 +25,7 @@ public class CarRaceBaseAgent : Agent {
         {
             Debug.LogError("Can't find PlayerCar!");
         }
-        m_PlayerCar.CarHitAction = CarHit;
+        m_PlayerCar.CarHitAction += CarHit;
         m_AgentCam = GetComponentInChildren<AgentCamera1>();
         if (m_AgentCam == null)
         {
