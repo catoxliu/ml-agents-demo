@@ -7,3 +7,5 @@ from .ppo.models import *
 from .ppo.trainer import *
 from .custom.custom_models import *
 from .custom.custom_trainer import *
+from .cnn_ppo.cnn_ppo_models import *
+from .cnn_ppo.cnn_ppo_trainer import *

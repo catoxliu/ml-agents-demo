@@ -13,6 +13,7 @@ from tensorflow.python.tools import freeze_graph
 from unitytrainers.ppo.trainer import PPOTrainer
 from unitytrainers.bc.trainer import BehavioralCloningTrainer
 from unitytrainers.custom.custom_trainer import CustomTrainer
+from unitytrainers.cnn_ppo.cnn_ppo_trainer import CNNPPOTrainer
 from unityagents import UnityEnvironment, UnityEnvironmentException
 
 
@@ -183,6 +184,9 @@ class TrainerController(object):
                                                        self.train_model, self.seed)
             elif trainer_parameters_dict[brain_name]['trainer'] == "custom":
                 self.trainers[brain_name] = CustomTrainer(sess, self.env, brain_name, trainer_parameters_dict[brain_name],
+                                                       self.train_model, self.seed)
+            elif trainer_parameters_dict[brain_name]['trainer'] == "CNN_PPO":
+                self.trainers[brain_name] = CNNPPOTrainer(sess, self.env, brain_name, trainer_parameters_dict[brain_name],
                                                        self.train_model, self.seed)
             else:
                 raise UnityEnvironmentException("The trainer config contains an unknown trainer type for brain {}"
