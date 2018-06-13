@@ -98,9 +98,9 @@ public class CarRaceBaseAgent : Agent {
         Vector3 nextPos;
         while(i >= 0)
         {
-            nextPos = m_RoadManager.GetNextCarPos(i);
+            nextPos = m_RoadManager.GetNextOnRoadCarPos(i);
             if (nextPos == Vector3.zero) break;
-            if (nextPos.z != curPos.z)
+            if (nextPos.x > curPos.x && nextPos.z != curPos.z)
             {
                 curPos.z = nextPos.z;
                 m_PlayerCar.Reset(curPos);

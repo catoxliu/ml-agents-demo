@@ -7,7 +7,7 @@ public class PlayerCar : BaseCar {
 
     private UnityAction m_CarHitAction;
     public UnityAction CarHitAction
-    { set { m_CarHitAction = value; } }
+    { get { return m_CarHitAction; } set { m_CarHitAction = value; } }
 
     //The main camera is at world zero point, the player car should be in front of it.
     public void Reset()

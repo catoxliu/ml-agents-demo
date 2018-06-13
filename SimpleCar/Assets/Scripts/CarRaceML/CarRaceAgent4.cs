@@ -30,7 +30,7 @@ public class CarRaceAgent4 : CarRaceBaseAgent
         int iTrack = 0;
         if (danger)
         {
-            Vector3 nextCar = m_RoadManager.GetNextCarPos(-1);
+            Vector3 nextCar = m_RoadManager.GetInFrontCarPos(m_PlayerCar.transform.position);
             iTrack = (Mathf.CeilToInt(nextCar.z / 5.0f) + 2);
         }
         else

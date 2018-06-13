@@ -10,7 +10,8 @@ public class InfiniteRoadManager : MonoBehaviour {
     private List<Transform> m_RoadPool = new List<Transform>();
     private List<BaseCar> m_CarsOnRoad = new List<BaseCar>();
     private static readonly float m_fRoadLength = 100.0f, m_fCarLength = 10.0f, 
-        m_fRoadLengthTotal = m_fRoadLength * m_iRoadPoolSize;
+        m_fRoadLengthTotal = m_fRoadLength * m_iRoadPoolSize,
+        m_fPlayerCarPosX = 8.0f;
 
     //m_fSpeed: the speed of player car, which is used to move the road in face
     //m_fGenerateRate: this factor could define the new car generate rate. the smaller, the more.
@@ -58,12 +59,22 @@ public class InfiniteRoadManager : MonoBehaviour {
             m_iScoreRecord = m_iDriveLength * m_iPassCarCount;
     }
 
-    public Vector3 GetNextCarPos(int startIdx = 0)
+    public Vector3 GetNextOnRoadCarPos(int startIdx = 0)
     {
-        if (startIdx < m_CarsOnRoad.Count - 1)
-            return m_CarsOnRoad[startIdx + 1].transform.position;
+        if (startIdx < m_CarsOnRoad.Count)
+            return m_CarsOnRoad[startIdx].transform.position;
         else
             return Vector3.zero;
+    }
+
+    public Vector3 GetInFrontCarPos(Vector3 pos)
+    {
+        foreach(var car in m_CarsOnRoad)
+        {
+            if (car.transform.position.x > pos.x && car.transform.position.z - pos.z < 4)
+                return car.transform.position;
+        }
+        return Vector3.zero;
     }
 
     //To use the simplest way to detect whether player is facing a car in front
@@ -72,7 +83,7 @@ public class InfiniteRoadManager : MonoBehaviour {
         foreach (var car in m_CarsOnRoad)
         {
             //if the car is to near or in diffrent track, continue
-            if (car.transform.position.x < 8 || Mathf.Abs(car.transform.position.z - pos.z) > 4)
+            if (car.transform.position.x < m_fPlayerCarPosX || Mathf.Abs(car.transform.position.z - pos.z) > 4)
                 continue;
             //if it is still far away, break;
             if (car.transform.position.x - pos.x > 30)
@@ -104,7 +115,7 @@ public class InfiniteRoadManager : MonoBehaviour {
         for(m_iCursor = m_CarsOnRoad.Count - 1; m_iCursor >= 0; m_iCursor--)
         {
             m_CarsOnRoad[m_iCursor].Move();
-            if (m_CarsOnRoad[m_iCursor].transform.position.x < 5)
+            if (m_CarsOnRoad[m_iCursor].transform.position.x < 0)
             {
                 CarFactory.Instance.RecycleCar(m_CarsOnRoad[m_iCursor]);
                 m_CarsOnRoad.RemoveAt(m_iCursor);
@@ -138,39 +149,40 @@ public class InfiniteRoadManager : MonoBehaviour {
 
     public float[] GenerateNewCars(int car_count, float born_road_length, float born_start_pos_x = 0)
     {
-        float carSpeed, carPosX, realSpeed;
+        float carSpeed, carPosX = 0, realSpeed;
         float[] bornCarPosX = new float[car_count];
-        m_iBornCarPosZ = 0;
+        m_iBornCarPosZ = -1;
         for (m_iCursor = 0; m_iCursor < car_count; m_iCursor++)
         {
             if (m_bIsTrain)
             {
                 m_iBornCarPosZ = ++m_iBornCarPosZ > 1 ? m_iBornCarPosZ - 3 : m_iBornCarPosZ;
+                carPosX = born_start_pos_x + (born_road_length / car_count) * m_iCursor;
             }
             else
             {
                 m_iBornCarPosZ = Random.Range(-1, 2);
+                carPosX = Random.Range(0.1f, 1.0f);
+                carPosX = born_start_pos_x + (born_road_length / car_count) * (m_iCursor + carPosX);
             }
             var car = CarFactory.Instance.GetARandomCar();
-            carPosX = Random.Range(0.1f, 1.0f);
-            carPosX = born_start_pos_x + (born_road_length / car_count) * (m_iCursor + carPosX);
             carSpeed = m_fSpeed - 0.8f;//Random.Range(0.1f, m_fSpeed);
             car.Reset(new Vector3(carPosX, 0, m_iBornCarPosZ * 5.0f));
             realSpeed = car.SetSpeed(m_fSpeed, carSpeed);
             car.Show();
             m_CarsOnRoad.Add(car);
-            bornCarPosX[m_iCursor] = carPosX / -realSpeed;
+            bornCarPosX[m_iCursor] = (carPosX - m_fPlayerCarPosX) / -realSpeed;
         }
         return bornCarPosX;
     }
 
-    public float[] SupplyEnoughCarsOnRoad(int car_count, float born_road_length)
+    public float[] SupplyEnoughCarsOnRoad(int car_count, float born_road_length, float start_point)
     {
         int carSupplyNum = car_count - m_CarsOnRoad.Count;
         if (carSupplyNum <= 0) return GetPointsOfCarOfRoads();
-        float carSupplyStartPos = 0;
-        if (m_CarsOnRoad.Count != 0) carSupplyStartPos = m_CarsOnRoad[m_CarsOnRoad.Count - 1].transform.position.x;
-        float carSupplyRoadLength = born_road_length - carSupplyStartPos;
+        float carSupplyStartPos = start_point;
+        if (m_CarsOnRoad.Count != 0) carSupplyStartPos += m_CarsOnRoad[m_CarsOnRoad.Count - 1].transform.position.x;
+        float carSupplyRoadLength = (carSupplyNum / car_count) * born_road_length;
         if (carSupplyRoadLength <= 0) return GetPointsOfCarOfRoads();
         GenerateNewCars(carSupplyNum, carSupplyRoadLength, carSupplyStartPos);
         return GetPointsOfCarOfRoads();
@@ -197,11 +209,11 @@ public class InfiniteRoadManager : MonoBehaviour {
         }
     }
 
-    void ClearNearCars()
+    public void ClearNearCars(float clearDistance = 0)
     {
         for (m_iCursor = m_CarsOnRoad.Count - 1; m_iCursor >= 0; m_iCursor--)
         {
-            if (m_CarsOnRoad[m_iCursor].transform.position.x < m_fCarLength+8)
+            if (m_CarsOnRoad[m_iCursor].transform.position.x < m_fCarLength + m_fPlayerCarPosX + clearDistance)
             {
                 CarFactory.Instance.RecycleCar(m_CarsOnRoad[m_iCursor]);
                 m_CarsOnRoad.RemoveAt(m_iCursor);
