@@ -182,7 +182,8 @@ public class InfiniteRoadManager : MonoBehaviour {
         m_iCursor = 0;
         foreach (var car in m_CarsOnRoad)
         {
-            bornCarPosX[m_iCursor] = car.transform.position.x / -car.RealSpeed;
+            bornCarPosX[m_iCursor] = (car.transform.position.x - m_fPlayerCarPosX) / -car.RealSpeed;
+            m_iCursor++;
         }
         return bornCarPosX;
     }
