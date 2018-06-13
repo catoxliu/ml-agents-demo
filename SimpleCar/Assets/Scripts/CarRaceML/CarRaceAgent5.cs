@@ -41,21 +41,23 @@ public class CarRaceAgent5 : Agent
 
     public override void AgentAction(float[] vectorAction, string textAction)
     {
-        m_PlayerCar.Steer(Mathf.Clamp(vectorAction[0], -1f, 1f));
+        float action = Mathf.Clamp(vectorAction[0], -1f, 1f);
+        m_PlayerCar.Steer(0.8f * action);
         if (!IsDone())
         {
-            AddReward(m_fRewardIncrement);
+            float carBias = Mathf.Abs(m_PlayerCar.transform.position.z) % 5;
+            carBias = Mathf.Sqrt(Mathf.Abs(2.5f - carBias) / 2.5f);
+            AddReward(m_fRewardIncrement * carBias);
             m_iStepCount++;
-            if (m_bCarOnRoad && m_iStepCount > m_RewardPoints[m_iRewardCount])
+            if (m_bCarOnRoad && m_iStepCount >= m_RewardPoints[m_iRewardCount])
             {
                 AddReward(1.0f);
                 m_iRewardCount++;
                 m_bCarOnRoad = m_iRewardCount < m_RewardPoints.Length;
             }
-            if (m_iStepCount >= agentParameters.maxStep - 2)
+            if (m_iStepCount >= agentParameters.maxStep)
             {
                 Done();
-                SetReward(1.0f);
             }
         }
     }
@@ -78,7 +80,7 @@ public class CarRaceAgent5 : Agent
     protected virtual void CarHit()
     {
         Done();
-        SetReward(-10.0f);
+        SetReward(-1.0f);
         Debug.Log("Car Hit at " + m_PlayerCar.transform.position);
     }
 

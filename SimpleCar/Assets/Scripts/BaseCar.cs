@@ -36,8 +36,7 @@ public class BaseCar : MonoBehaviour {
 
     public void Steer(float amount)
     {
-        if (Mathf.Abs(amount) > 0.2f)
-            transform.Translate(0, 0, amount, Space.World);
+        transform.Translate(0, 0, amount, Space.World);
     }
 
 }

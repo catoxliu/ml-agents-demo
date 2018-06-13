@@ -50,20 +50,24 @@ public class CarRaceAcademy2 : Academy
             //Generate cars
             float[] bornCars = m_RoadManager.GenerateNewCars(m_iCarsOnRoad, m_iGoalDistance, 30);
             m_Agent.SetRewardPoints(bornCars);
+            m_Agent.agentParameters.maxStep = Mathf.CeilToInt(bornCars[bornCars.Length - 1]) + 10; 
+        }
+        else
+        {
+            m_Agent.agentParameters.maxStep = m_iGoalDistance;
         }
 
         m_RoadManager.CarGenerateRage = m_iGenerateRate;
-
-        m_Agent.agentParameters.maxStep = m_iGoalDistance;
     }
 
     void AgentResetCallback()
     {
         if (m_iCarsOnRoad > 0)
         {
-            m_RoadManager.ResetGame();
-            float[] bornCars = m_RoadManager.SupplyEnoughCarsOnRoad(m_iCarsOnRoad, m_iGoalDistance);
+            m_RoadManager.ClearNearCars(50.0f);
+            float[] bornCars = m_RoadManager.SupplyEnoughCarsOnRoad(m_iCarsOnRoad, m_iGoalDistance, 30);
             m_Agent.SetRewardPoints(bornCars);
+            m_Agent.agentParameters.maxStep = Mathf.CeilToInt(bornCars[bornCars.Length - 1]) + 10;
         }
     }
 
