@@ -9,6 +9,7 @@ public class AgentCamera1 : MonoBehaviour
     public int m_iResWidth = 40, m_iResHeight = 16;
 
     private Material m_RenderDepthMat;
+    private Material m_RenderGrayScale;
     private RenderTexture m_AgentRT;
     private Texture2D m_AgentTex;
     private Camera m_AgentCam;
@@ -22,6 +23,7 @@ public class AgentCamera1 : MonoBehaviour
         Channel8Bit,
         Channel16bit,
         Channel32Bit,
+        WhiteBlack8Bit,
     };
 
     // Use this for initialization
@@ -30,6 +32,7 @@ public class AgentCamera1 : MonoBehaviour
         m_AgentCam = GetComponent<Camera>();
         m_AgentCam.depthTextureMode = DepthTextureMode.Depth;
         m_RenderDepthMat = new Material(Shader.Find("Hidden/RenderDepth"));
+        m_RenderGrayScale = new Material(Shader.Find("Hidden/RenderGrayScale"));
 
         RenderTextureFormat rtFormat = RenderTextureFormat.Default;
         TextureFormat texFormat = TextureFormat.ARGB4444;
@@ -49,6 +52,11 @@ public class AgentCamera1 : MonoBehaviour
                 rtFormat = RenderTextureFormat.ARGBFloat;
                 texFormat = TextureFormat.RGBAFloat;
                 m_iChannelByteCount = 4;
+                break;
+            case CameraFormat.WhiteBlack8Bit:
+                rtFormat = RenderTextureFormat.ARGB32;
+                texFormat = TextureFormat.RGBA32;
+                m_iChannelByteCount = 1;
                 break;
         }
         m_AgentRT = new RenderTexture(m_iResWidth, m_iResHeight, 32, rtFormat);
@@ -111,6 +119,7 @@ public class AgentCamera1 : MonoBehaviour
         switch (m_eAgentCamFormat)
         {
             case CameraFormat.Channel8Bit:
+            case CameraFormat.WhiteBlack8Bit:
                 var i = 0;
                 foreach (var bit in m_bSingleChannelRawData)
                 {
@@ -140,7 +149,10 @@ public class AgentCamera1 : MonoBehaviour
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        Graphics.Blit(source, destination, m_RenderDepthMat);
+        if (m_eAgentCamFormat != CameraFormat.WhiteBlack8Bit)
+            Graphics.Blit(source, destination, m_RenderDepthMat);
+        else
+            Graphics.Blit(source, destination, m_RenderGrayScale);
     }
 
 }
