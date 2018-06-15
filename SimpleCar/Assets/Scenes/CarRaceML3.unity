@@ -300,11 +300,11 @@ MonoBehaviour:
   resetParameters:
     resetParameters:
     - key: CarsOnRoad
-      value: 4
+      value: 8
     - key: GenerateRate
       value: 100
     - key: GoalDistance
-      value: 100
+      value: 300
   m_Agents:
   - {fileID: 1164467967}
   - {fileID: 715855765}
