@@ -187,14 +187,14 @@ CarRacePPOBrain:
     batch_size: 128
     normalize: false
     num_layers: 1
-    hidden_units: 4096
-    beta: 0.001
+    hidden_units: 32
+    beta: 0.01
     gamma: 0.995
     lambd: 0.95
-    buffer_size: 1024
-    max_steps: 1.0e7
+    buffer_size: 1280
+    max_steps: 1.0e6
     summary_freq: 2000
-    time_horizon: 3
+    time_horizon: 64
     num_epoch: 3
     learning_rate: 1.0e-4
-    epsilon: 0.3
+    epsilon: 0.1

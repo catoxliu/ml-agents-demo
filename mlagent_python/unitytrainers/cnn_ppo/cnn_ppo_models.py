@@ -21,10 +21,10 @@ class CNNPPOModel(PPOModel):
         :return: List of hidden layer tensors.
         """
         image_input = tf.reshape(vector_input, tf.stack([-1, 40, 16, 1]));
-        conv1 = tf.layers.conv2d(image_input, 16, kernel_size=5, padding="same",
+        conv1 = tf.layers.conv2d(image_input, 32, kernel_size=7, padding="same",
                                  activation=tf.nn.relu)
         pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=2, strides=2)
-        conv2 = tf.layers.conv2d(pool1, 32, kernel_size=3, padding="same",
+        conv2 = tf.layers.conv2d(pool1, 64, kernel_size=5, padding="same",
                                  activation=tf.nn.relu)
         pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=2, strides=2)
         hidden = c_layers.flatten(pool2)
