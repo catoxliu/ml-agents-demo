@@ -136,7 +136,9 @@ public class InfiniteRoadManager : MonoBehaviour {
         for (int i = 0; i < m_iRoadPoolSize; i++)
         {
             m_RoadPool.Add(GameObject.Instantiate(m_RoadPrefab).transform);
-            m_RoadPool[i].position = new Vector3(m_fRoadLength * i, -0.5f, 0);
+            m_RoadPool[i].parent = transform;
+            m_RoadPool[i].transform.localScale = Vector3.one;
+            m_RoadPool[i].localPosition = new Vector3(m_fRoadLength * i, -0.5f, 0);
         }
     }
 
@@ -167,7 +169,7 @@ public class InfiniteRoadManager : MonoBehaviour {
             }
             var car = CarFactory.Instance.GetARandomCar();
             carSpeed = m_fSpeed - 0.8f;//Random.Range(0.1f, m_fSpeed);
-            car.Reset(new Vector3(carPosX, 0, m_iBornCarPosZ * 5.0f));
+            car.Reset(new Vector3(carPosX, transform.position.y, transform.position.z + m_iBornCarPosZ * 5.0f));
             realSpeed = car.SetSpeed(m_fSpeed, carSpeed);
             car.Show();
             m_CarsOnRoad.Add(car);
@@ -181,9 +183,10 @@ public class InfiniteRoadManager : MonoBehaviour {
         int carSupplyNum = car_count - m_CarsOnRoad.Count;
         if (carSupplyNum <= 0) return GetPointsOfCarOfRoads();
         float carSupplyStartPos = start_point;
-        if (m_CarsOnRoad.Count != 0) carSupplyStartPos += m_CarsOnRoad[m_CarsOnRoad.Count - 1].transform.position.x;
-        float carSupplyRoadLength = (carSupplyNum / car_count) * born_road_length;
+        float carSupplyRoadLength = ((float)carSupplyNum / (float)car_count) * born_road_length;
         if (carSupplyRoadLength <= 0) return GetPointsOfCarOfRoads();
+        if (m_CarsOnRoad.Count != 0) carSupplyStartPos = m_CarsOnRoad[m_CarsOnRoad.Count - 1].transform.position.x
+                + carSupplyRoadLength / (float)carSupplyNum;
         GenerateNewCars(carSupplyNum, carSupplyRoadLength, carSupplyStartPos);
         return GetPointsOfCarOfRoads();
     }
@@ -228,7 +231,7 @@ public class InfiniteRoadManager : MonoBehaviour {
         //make sure car prefab look at the backword of the world.
         go.transform.LookAt(Vector3.back);
         m_Player = go.AddComponent<PlayerCar>();
-        m_Player.Reset();
+        m_Player.PlayerPosition = new Vector3(m_fPlayerCarPosX, transform.position.y, 0);
         m_Player.Show();
 
         m_Player.CarHitAction = ResetGame;

@@ -9,16 +9,20 @@ public class PlayerCar : BaseCar {
     public UnityAction CarHitAction
     { get { return m_CarHitAction; } set { m_CarHitAction = value; } }
 
+    private Vector3 m_vPos;
+    public Vector3 PlayerPosition { get { return m_vPos; } set { m_vPos = value;Reset(); } }
+
     //The main camera is at world zero point, the player car should be in front of it.
     public void Reset()
     {
-        Reset(new Vector3(8, 0, 0));
+        Reset(m_vPos);
     }
 
     private void Start()
     {
         var rb = gameObject.AddComponent<Rigidbody>();
         rb.useGravity = false;
+        m_vPos = transform.position;
     }
 
     void Update () {

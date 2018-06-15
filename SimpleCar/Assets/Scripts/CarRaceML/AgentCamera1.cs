@@ -13,6 +13,7 @@ public class AgentCamera1 : MonoBehaviour
     private RenderTexture m_AgentRT;
     private Texture2D m_AgentTex;
     private Camera m_AgentCam;
+    private Rect m_Rect;
 
     //The Agent Camera Resolution
     private int m_iChannelByteCount;
@@ -68,6 +69,10 @@ public class AgentCamera1 : MonoBehaviour
         m_AgentTex = new Texture2D(m_iResWidth, m_iResHeight, texFormat, false);
 
         m_bSingleChannelRawData = new byte[m_iResWidth * m_iResHeight * m_iChannelByteCount];
+
+        m_Rect = new Rect(transform.position.z / 100.0f * (m_iResWidth+10), 
+            transform.position.y/100.0f * (m_iResHeight + 10) + 30,
+            m_iResWidth, m_iResHeight);
     }
 
     // Update is called once per frame
@@ -144,7 +149,7 @@ public class AgentCamera1 : MonoBehaviour
     private void OnGUI()
     {
         //Draw the RenderTexture for debug use
-        Graphics.DrawTexture(new Rect(0, 30, 40, 16), m_AgentRT);
+        Graphics.DrawTexture(m_Rect, m_AgentRT);
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)

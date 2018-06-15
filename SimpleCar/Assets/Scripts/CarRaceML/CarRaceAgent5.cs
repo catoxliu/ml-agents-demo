@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 public class CarRaceAgent5 : Agent
 {
-    public UnityAction m_AgentReset;
+    public UnityAction<CarRaceAgent5> m_AgentReset;
     public PlayerCar m_PlayerCar;
     protected AgentCamera1 m_AgentCam;
 
@@ -42,15 +42,16 @@ public class CarRaceAgent5 : Agent
     public override void AgentAction(float[] vectorAction, string textAction)
     {
         float action = Mathf.Clamp(vectorAction[0], -1f, 1f);
-        m_PlayerCar.Steer(0.8f * action);
+        m_PlayerCar.Steer(0.6f * action);
         if (!IsDone())
         {
-            float carBias = Mathf.Abs(m_PlayerCar.transform.position.z) % 5;
+            float carBias = Mathf.Abs(m_PlayerCar.transform.localPosition.z) % 5;
             carBias = Mathf.Sqrt(Mathf.Abs(2.5f - carBias) / 2.5f);
             AddReward(m_fRewardIncrement * carBias);
             m_iStepCount++;
             if (m_bCarOnRoad && m_iStepCount >= m_RewardPoints[m_iRewardCount])
             {
+                Debug.Log("Passing a car at step " + m_iStepCount); 
                 AddReward(1.0f);
                 m_iRewardCount++;
                 m_bCarOnRoad = m_iRewardCount < m_RewardPoints.Length;
@@ -68,7 +69,7 @@ public class CarRaceAgent5 : Agent
         m_fRewardIncrement = 1.0f / (float)agentParameters.maxStep;
         m_iStepCount = 0;
         m_iRewardCount = 0;
-        if (m_AgentReset != null) m_AgentReset();
+        if (m_AgentReset != null) m_AgentReset(this);
     }
 
     public void SetRewardPoints(float[] bornCars)
@@ -81,7 +82,7 @@ public class CarRaceAgent5 : Agent
     {
         Done();
         SetReward(-1.0f);
-        Debug.Log("Car Hit at " + m_PlayerCar.transform.position);
+        Debug.Log("Car Hit at " + m_PlayerCar.transform.localPosition);
     }
 
 }
