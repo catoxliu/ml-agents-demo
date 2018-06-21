@@ -27,10 +27,10 @@ class CNNPPOTrainer(PPOTrainer):
         :param training: Whether the trainer is set for training.
         """
         self.param_keys = ['batch_size', 'beta', 'buffer_size', 'epsilon', 'gamma', 'hidden_units', 'lambd',
-                           'learning_rate',
-                           'max_steps', 'normalize', 'num_epoch', 'num_layers', 'time_horizon', 'sequence_length',
-                           'summary_freq',
-                           'use_recurrent', 'graph_scope', 'summary_path', 'memory_size']
+                           'learning_rate', 'max_steps', 'normalize', 'num_epoch', 'num_layers',
+                           'time_horizon', 'sequence_length', 'summary_freq', 'use_recurrent',
+                           'graph_scope', 'summary_path', 'memory_size', 'use_curiosity', 'curiosity_strength',
+                           'curiosity_enc_size']
 
         for k in self.param_keys:
             if k not in trainer_parameters:
@@ -40,12 +40,14 @@ class CNNPPOTrainer(PPOTrainer):
         super(PPOTrainer, self).__init__(sess, env, brain_name, trainer_parameters, training)
 
         self.use_recurrent = trainer_parameters["use_recurrent"]
+        self.use_curiosity = bool(trainer_parameters['use_curiosity'])
         self.sequence_length = 1
+        self.step = 0
+        self.has_updated = False
         self.m_size = None
         if self.use_recurrent:
             self.m_size = trainer_parameters["memory_size"]
             self.sequence_length = trainer_parameters["sequence_length"]
-        if self.use_recurrent:
             if self.m_size == 0:
                 raise UnityTrainerException("The memory size for brain {0} is 0 even though the trainer uses recurrent."
                                             .format(brain_name))
@@ -65,10 +67,18 @@ class CNNPPOTrainer(PPOTrainer):
                                   normalize=trainer_parameters['normalize'],
                                   use_recurrent=trainer_parameters['use_recurrent'],
                                   num_layers=int(trainer_parameters['num_layers']),
-                                  m_size=self.m_size)
+                                  m_size=self.m_size,
+                                  use_curiosity=bool(trainer_parameters['use_curiosity']),
+                                  curiosity_strength=float(trainer_parameters['curiosity_strength']),
+                                  curiosity_enc_size=float(trainer_parameters['curiosity_enc_size']))
 
         stats = {'cumulative_reward': [], 'episode_length': [], 'value_estimate': [],
                  'entropy': [], 'value_loss': [], 'policy_loss': [], 'learning_rate': []}
+        if self.use_curiosity:
+            stats['forward_loss'] = []
+            stats['inverse_loss'] = []
+            stats['intrinsic_reward'] = []
+            self.intrinsic_rewards = {}
         self.stats = stats
 
         self.training_buffer = Buffer()
@@ -76,10 +86,20 @@ class CNNPPOTrainer(PPOTrainer):
         self.episode_steps = {}
         self.is_continuous_action = (env.brains[brain_name].vector_action_space_type == "continuous")
         self.is_continuous_observation = (env.brains[brain_name].vector_observation_space_type == "continuous")
-        self.use_observations = (env.brains[brain_name].number_visual_observations > 0)
-        self.use_states = (env.brains[brain_name].vector_observation_space_size > 0)
+        self.use_visual_obs = (env.brains[brain_name].number_visual_observations > 0)
+        self.use_vector_obs = (env.brains[brain_name].vector_observation_space_size > 0)
         self.summary_path = trainer_parameters['summary_path']
         if not os.path.exists(self.summary_path):
             os.makedirs(self.summary_path)
 
         self.summary_writer = tf.summary.FileWriter(self.summary_path)
+
+        self.inference_run_list = [self.model.output, self.model.all_probs, self.model.value,
+                                   self.model.entropy, self.model.learning_rate]
+        if self.is_continuous_action:
+            self.inference_run_list.append(self.model.output_pre)
+        if self.use_recurrent:
+            self.inference_run_list.extend([self.model.memory_out])
+        if (self.is_training and self.is_continuous_observation and
+                self.use_vector_obs and self.trainer_parameters['normalize']):
+            self.inference_run_list.extend([self.model.update_mean, self.model.update_variance])
