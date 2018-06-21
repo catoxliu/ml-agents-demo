@@ -42,7 +42,7 @@ public class CarRaceAgent4 : CarRaceBaseAgent
 
         //The agent should be trained as much as possible before reset it.
         //Unless your goal is let the agent to achieve something as quickly as possible.
-        if (brain.brainType == BrainType.External)
+        if (brain.brainType == MLAgents.BrainType.External)
         {
             m_bAction = m_iFactor > 4 && danger;
             m_iAction = iTrack;

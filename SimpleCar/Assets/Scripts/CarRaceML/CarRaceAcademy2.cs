@@ -1,6 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using MLAgents;
 
 public class CarRaceAcademy2 : Academy
 {

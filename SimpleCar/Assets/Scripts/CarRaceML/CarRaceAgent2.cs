@@ -54,7 +54,7 @@ public class CarRaceAgent2 : CarRaceBaseAgent {
         {
             AddReward(-0.1f * m_iFactor);
             m_iCorrectCount = 0;
-            if (brain.brainType == BrainType.External) return;
+            if (brain.brainType == MLAgents.BrainType.External) return;
         }
 
         m_bAction = action == 1;
